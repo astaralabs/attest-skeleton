@@ -1,4 +1,4 @@
-# Sample Hardhat Project
+# Sample Attest Project
 
 This project demonstrates a basic attestation process
 
