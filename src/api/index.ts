@@ -9,6 +9,7 @@ import {
   getSchemaInfo,
   onChainAttest,
   registerSchema,
+  revokeOnChainAttest,
 } from "../attest";
 
 dotenv.config();
@@ -35,21 +36,18 @@ router.post("/register-schema", async (ctx) => {
   }
 
   try {
-    const tx = await registerSchema(schema);
-    console.log(tx);
+    const uid = await registerSchema(schema);
+    ctx.response.status = 200;
+    ctx.response.body = { message: uid };
+    return;
   } catch (e) {
-    console.log(e);
     ctx.response.status = 400;
     ctx.response.body = { message: "Transaction failed" };
     return;
   }
-
-  ctx.response.status = 200;
-  ctx.response.body = { message: "Schema registered successfully" };
-  return;
 });
 
-router.post("/attest", async (ctx) => {
+router.post("/onchain-attest", async (ctx) => {
   const { schema, schemaUID, data } = ctx.request.body;
 
   const schemaElements = schema.split(", ");
@@ -94,44 +92,56 @@ router.post("/attest", async (ctx) => {
   }
 });
 
-router.post("/attestation-info", async (ctx) => {
-  const { attestUID } = ctx.request.body;
+router.post("/revoke-onchain-attest", async (ctx) => {
+  const { schemaUID, attestationUID } = ctx.request.body;
 
-  const uidRegex = /0x(?!0{64})[a-fA-F0-9]{64}/;
-  if (!attestUID.match(uidRegex)) {
+  try {
+    await revokeOnChainAttest(schemaUID, attestationUID);
+    ctx.response.status = 200;
+    ctx.response.body = { message: "Attestation revoked successfully" };
+  } catch (e) {
     ctx.response.status = 400;
-    ctx.response.body = { message: "Field 'attestUID' has incorrect format" };
+    ctx.response.body = { message: "Something went wrong" };
     return;
   }
-
-  const attestation = await getAttestation(attestUID);
-  const zero_address =
-    "0x0000000000000000000000000000000000000000000000000000000000000000";
-  if (attestation.schema === zero_address) {
-    ctx.response.status = 400;
-    ctx.response.body = { message: "Unknown attestation UID" };
-    return;
-  }
-  console.log(attestation);
-
-  ctx.response.status = 200;
-  ctx.response.body = { message: attestation.schema }; //Here we should return all the values
 });
 
-router.post("/schema-info", async (ctx) => {
-  const { schemaUID } = ctx.request.body;
-
-  const uidRegex = /0x(?!0{64})[a-fA-F0-9]{64}/;
-  if (!schemaUID.match(uidRegex)) {
-    ctx.response.status = 400;
-    ctx.response.body = { message: "Field 'schemaUID' has incorrect format" };
-    return;
-  }
+router.get("/schema-info", async (ctx) => {
+  const schemaUID: any = ctx.query.schemaUID;
 
   try {
     const record = await getSchemaInfo(schemaUID);
     ctx.response.status = 200;
     ctx.response.body = { message: record };
+  } catch (e) {
+    ctx.response.status = 400;
+    ctx.response.body = { message: "Something went wrong" };
+    return;
+  }
+});
+
+router.get("/attestation-info", async (ctx) => {
+  const attestUID: any = ctx.query.attestUID;
+
+  try {
+    const attestation = await getAttestation(attestUID);
+
+    const attestationInfo = {
+      uid: attestation.uid,
+      schema: attestation.schema,
+      refUID: attestation.refUID,
+      time: Number(attestation.time),
+      expirationTime: Number(attestation.expirationTime),
+      revocationTime: Number(attestation.revocationTime),
+      recipient: attestation.recipient,
+      revocable: attestation.revocable,
+      attester: attestation.attester,
+      data: attestation.data,
+    };
+
+    ctx.response.status = 200;
+    ctx.response.body = { message: attestationInfo };
+    return;
   } catch (e) {
     ctx.response.status = 400;
     ctx.response.body = { message: "Something went wrong" };

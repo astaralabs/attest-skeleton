@@ -18,7 +18,9 @@
     "hardhat": "^2.19.0",
     "koa": "^2.14.2",
     "koa-bodyparser": "^4.4.1",
-    "ts-node": "^10.9.1"
+    "random-words": "^2.0.0",
+    "ts-node": "^10.9.1",
+    "web3": "^4.3.0"
   },
   "devDependencies": {
     "@koa/cors": "^4.0.0",
