@@ -4,7 +4,7 @@ import {
   SchemaItem,
   SchemaRegistry,
 } from "@ethereum-attestation-service/eas-sdk";
-import { EventLog, ethers } from "ethers";
+import { ethers } from "ethers";
 
 import * as dotenv from "dotenv";
 import Web3 from "web3";
@@ -107,7 +107,7 @@ export async function onChainAttest(
   const tx = await eas.attest({
     schema: schemaUID,
     data: {
-      recipient: "0xc3F064CbFDBf76673051B24f9BFB62fd211E6DCa", //Testing purposes
+      recipient: "0xc3F064CbFDBf76673051B24f9BFB62fd211E6DCa", //Testing purposes - MAY BE EMPTY
       data: encodeData,
     },
   });

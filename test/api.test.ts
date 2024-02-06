@@ -137,7 +137,7 @@ describe("All endpoints test", () => {
 
   it<LocalTestContext>("Make an attestation", async ({ testClient }) => {
     const res = await testClient.post("/onchain-attest").send({
-      schema: "uint256 field11, bool field1, address field2, string field3", //Already created schema
+      schema: "uint256 field11, bool field1, address field2, string field3", //Schema created previously
       schemaUID:
         "0x2F8A2CBCAD8A03E8C51CF1081A7B0DC67DB2980D52B9631F97B43A67CB83208A",
       data: [
